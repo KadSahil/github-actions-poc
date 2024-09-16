@@ -1,17 +1,24 @@
-name: DEV Test, Build and Deploy
+name: GitHub-POC-Deployment
 
 on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Select environment for the Application"
+        description: "Deployment Environment"
         required: true
         type: choice
         options:
           - DEV
           - UAT
           - PROD
-
+      java:
+        description: "Java Version"
+        required: true
+        type: choice
+        options:
+          - '8'
+          - '17'
+          
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -23,14 +30,14 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/${{ inputs.environment }}/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven
-    - name: Set up JDK 1.8
+    - name: Set up Java
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: 8
+        java-version: ${{ inputs.java }}
     - name: Test with Maven
       run: mvn test
     - name: Upload MUnit reports
@@ -50,21 +57,21 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/${{ inputs.environment }}/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven
-    - name: Set up JDK 1.8
+    - name: Set up Java
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: 8
+        java-version: ${{ inputs.java }}
     - name: Build with Maven
       run: mvn -B package --file pom.xml -DskipTests
     - name: Upload artifact 
       uses: actions/upload-artifact@v4
       with:
           name: artifacts
-          path: target/*.jar
+          path: ${{ inputs.environment }}/target/*.jar
           
   deploy-cloudhub:
     needs: build
@@ -77,7 +84,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/${{ inputs.environment }}/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven
     - name: Download the JAR File
