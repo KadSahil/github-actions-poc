@@ -1,0 +1,92 @@
+name: DEV Test, Build and Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select environment for the Application"
+        required: true
+        type: choice
+        options:
+          - DEV
+          - UAT
+          - PROD
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Checkout this repo
+      uses: actions/checkout@v4
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: 8
+    - name: Test with Maven
+      run: mvn test
+    - name: Upload MUnit reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: munit-test-reports
+        path: target/site/munit/coverage
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Checkout this repo
+      uses: actions/checkout@v4
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: 8
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml -DskipTests
+    - name: Upload artifact 
+      uses: actions/upload-artifact@v4
+      with:
+          name: artifacts
+          path: target/*.jar
+          
+  deploy-cloudhub:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:    
+    - name: Checkout this repo
+      uses: actions/checkout@v4
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven
+    - name: Download the JAR File
+      uses: actions/download-artifact@v4
+      with:
+        name: artifacts
+    - name: Deploy to ${{ inputs.environment }}
+      env:
+        connectedAppId: ${{ secrets.connected_app_id }}
+        connectedAppSecret: ${{ secrets.connected_app_secret }}
+        grantType: ${{ secrets.grant_type }}
+      run: mvn deploy -DskipTests -DmuleDeploy -DClientId="$connectedAppId" -DClientSecret="$connectedAppSecret" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"application.name"=if [ "${{ inputs.environment }}" == "PROD" ]; then "github-actions-poc"; else exit "github-actions-poc-${{ inputs.environment }}"; fi
