@@ -100,3 +100,4 @@ jobs:
           echo 'mvn deploy -DskipTests -DmuleDeploy -DClientId="${{ secrets.uat_connected_app_id }}" -DClientSecret="${{ secrets.uat_connected_app_secret }}" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"application.name"="github-actions-poc-${{ inputs.environment }}"'
         else
           echo 'mvn deploy -DskipTests -DmuleDeploy -DClientId="${{ secrets.prod_connected_app_id }}" -DClientSecret="${{ secrets.prod_connected_app_secret }}" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"application.name"="github-actions-poc"'
+        fi
