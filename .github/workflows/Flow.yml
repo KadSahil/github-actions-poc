@@ -93,7 +93,7 @@ jobs:
         name: artifacts
     - name: Deploy to ${{ inputs.environment }}
       env:
-        connectedAppId: ${{ secrets.${{ inputs.environment }}_connected_app_id }}
-        connectedAppSecret: ${{ secrets.${{ inputs.environment }}_connected_app_secret }}
-        grantType: ${{ secrets.${{ inputs.environment }}_grant_type }}
+        connectedAppId: ${{ secrets.'${{ inputs.environment }}_connected_app_id' }}
+        connectedAppSecret: ${{ secrets.'${{ inputs.environment }}_connected_app_secret' }}
+        grantType: ${{ secrets.'${{ inputs.environment }}_grant_type' }}
       run: mvn deploy -DskipTests -DmuleDeploy -DClientId="$connectedAppId" -DClientSecret="$connectedAppSecret" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"application.name"=if [ "${{ inputs.environment }}" == "PROD" ]; then "github-actions-poc"; else exit "github-actions-poc-${{ inputs.environment }}"; fi
