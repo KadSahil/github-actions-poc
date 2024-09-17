@@ -22,7 +22,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
     steps:
     - name: Checkout this repo
       uses: actions/checkout@v4
@@ -49,7 +48,6 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
     steps:
     - name: Checkout this repo
       uses: actions/checkout@v4
@@ -76,7 +74,6 @@ jobs:
   deploy-cloudhub:
     needs: build
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
     steps:    
     - name: Checkout this repo
       uses: actions/checkout@v4
@@ -93,7 +90,13 @@ jobs:
         name: artifacts
     - name: Deploy to ${{ inputs.environment }}
       env:
-        connectedAppId: if [ "${{ inputs.environment }}" == "DEV" ]; ${{ secrets.dev_connected_app_id }}; elif ["${{ inputs.environment }}" == "UAT"]; ${{ secrets.uat_connected_app_id }}; else ${{ secrets.prod_connected_app_id }}; fi
-        connectedAppSecret: if [ "${{ inputs.environment }}" == "DEV" ]; ${{ secrets.dev_connected_app_secret }}; elif ["${{ inputs.environment }}" == "UAT"]; ${{ secrets.uat_connected_app_secret }}; else ${{ secrets.prod_connected_app_secret }}; fi
-        grantType: ${{ secrets.grant_type }}
-      run: mvn deploy -DskipTests -DmuleDeploy -DClientId="$connectedAppId" -DClientSecret="$connectedAppSecret" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"application.name"=if [ "${{ inputs.environment }}" == "PROD" ] then echo "github-actions-poc" else echo "github-actions-poc-${{ inputs.environment }}" fi
+       grantType: ${{ secrets.grant_type }}
+      run: |
+        if [ "${{ inputs.environment }}" == "DEV" ];
+        then
+          echo 'mvn deploy -DskipTests -DmuleDeploy -DClientId="${{ secrets.dev_connected_app_id }}" -DClientSecret="${{ secrets.dev_connected_app_secret }}" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"application.name"="github-actions-poc-${{ inputs.environment }}"'
+        elif [ "${{ inputs.environment }}" == "UAT" ];
+        then
+          echo 'mvn deploy -DskipTests -DmuleDeploy -DClientId="${{ secrets.uat_connected_app_id }}" -DClientSecret="${{ secrets.uat_connected_app_secret }}" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"application.name"="github-actions-poc-${{ inputs.environment }}"'
+        else
+          echo 'mvn deploy -DskipTests -DmuleDeploy -DClientId="${{ secrets.prod_connected_app_id }}" -DClientSecret="${{ secrets.prod_connected_app_secret }}" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"application.name"="github-actions-poc"'
