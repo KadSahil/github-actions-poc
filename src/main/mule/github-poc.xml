@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ce06a334-ee06-4dcd-9949-50f2ffc99837" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="github-pocFlow" doc:id="58002d38-44b5-404d-aff2-bdf1d1802042" >
+		<http:listener doc:name="Listener" doc:id="d73b5237-4a07-412f-b417-11f5f2ab1dd5" config-ref="HTTP_Listener_config" path="/githubPOC"/>
+		<logger level="INFO" doc:name="Logger" doc:id="0256b657-510e-4e39-b54a-a0ab041282b0" message="Flow Started"/>
+		<ee:transform doc:name="Transform Message" doc:id="f1712be7-99f9-44fb-8718-a911ffac2784" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+"This is a Transform Message from " ++ Mule::p('mule.env') ++ " Environment."]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="45e51d55-55c4-4b37-b66b-3853d057c809" message="Flow Ended"/>
+	</flow>
+</mule>
