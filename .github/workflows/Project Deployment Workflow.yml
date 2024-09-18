@@ -1,5 +1,5 @@
 # The name of the workflow, which is displayed in the GitHub Actions tab. This helps identify the workflow's purpose.
-name: "Project Deployment Workflow"
+name: "GitHub POC Deployment Workflow"
 
 # Trigger the workflow manually using the workflow_dispatch event with inputs for environment, Java version, and commit message
 on:
@@ -26,7 +26,7 @@ on:
         type: string
 
 # Display the commit message, environment, and project name in the run name for better traceability
-run-name: " Commit: ${{ inputs.commit }} | Environment: ${{ inputs.environment }} | Project Deployment"
+run-name: " Commit: ${{ inputs.commit }} | Environment: ${{ inputs.environment }} | GitHub POC Deployment"
 
 jobs:
   # Testing job
@@ -175,10 +175,10 @@ jobs:
       run: |
         if [ "${{ inputs.environment }}" == "DEV" ];
         then
-          mvn clean deploy -DskipTests -DmuleDeploy -DClientId="$connectedAppId" -DClientSecret="$connectedAppSecret" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"mule.env"="${{ secrets.dev_mule_key }}" -D"mule.key"="${{ secrets.dev_mule_key }}" -D"anypoint.platform.client_id"="${{ secrets.dev_anypoint_platform_client_id }}" -D"anypoint.platform.client_secret"="${{ secrets.dev_anypoint_platform_client_secret }}" -D"application.name"="Project-application-name-dev"
+          mvn clean deploy -DskipTests -DmuleDeploy -DClientId="$connectedAppId" -DClientSecret="$connectedAppSecret" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"mule.env"="${{ secrets.dev_mule_key }}" -D"mule.key"="${{ secrets.dev_mule_key }}" -D"anypoint.platform.client_id"="${{ secrets.dev_anypoint_platform_client_id }}" -D"anypoint.platform.client_secret"="${{ secrets.dev_anypoint_platform_client_secret }}" -D"application.name"="github-poc-api-dev"
         elif [ "${{ inputs.environment }}" == "UAT" ];
         then
-          mvn clean deploy -DskipTests -DmuleDeploy -DClientId="$connectedAppId" -DClientSecret="$connectedAppSecret" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"mule.env"="${{ secrets.uat_mule_key }}" -D"mule.key"="${{ secrets.uat_mule_key }}" -D"anypoint.platform.client_id"="${{ secrets.uat_anypoint_platform_client_id }}" -D"anypoint.platform.client_secret"="${{ secrets.uat_anypoint_platform_client_secret }}" -D"application.name"="Project-application-name-uat"
+          mvn clean deploy -DskipTests -DmuleDeploy -DClientId="$connectedAppId" -DClientSecret="$connectedAppSecret" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"mule.env"="${{ secrets.uat_mule_key }}" -D"mule.key"="${{ secrets.uat_mule_key }}" -D"anypoint.platform.client_id"="${{ secrets.uat_anypoint_platform_client_id }}" -D"anypoint.platform.client_secret"="${{ secrets.uat_anypoint_platform_client_secret }}" -D"application.name"="github-poc-api--uat"
         else
-          mvn clean deploy -DskipTests -DmuleDeploy -DClientId="$connectedAppId" -DClientSecret="$connectedAppSecret" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"mule.env"="${{ secrets.prod_mule_key }}" -D"mule.key"="${{ secrets.prod_mule_key }}" -D"anypoint.platform.client_id"="${{ secrets.prod_anypoint_platform_client_id }}" -D"anypoint.platform.client_secret"="${{ secrets.prod_anypoint_platform_client_secret }}" -D"application.name"="Project-application-name"
+          mvn clean deploy -DskipTests -DmuleDeploy -DClientId="$connectedAppId" -DClientSecret="$connectedAppSecret" -DGrantType="$grantType" -Denvironment="${{ inputs.environment }}" -D"mule.env"="${{ secrets.prod_mule_key }}" -D"mule.key"="${{ secrets.prod_mule_key }}" -D"anypoint.platform.client_id"="${{ secrets.prod_anypoint_platform_client_id }}" -D"anypoint.platform.client_secret"="${{ secrets.prod_anypoint_platform_client_secret }}" -D"application.name"="github-poc-api"
         fi
